@@ -115,7 +115,7 @@ def askForStatFeatureType(fields):
 		command = raw_input().split(" ")
 		
 		if command[0] == "help":
-			printFeatureTypeHelpMessage()
+			printStatFeatureTypeHelpMessage()
 
 		elif command[0] == "print":
 			if len(command) < 2:
@@ -187,10 +187,10 @@ def hash_feature(item, additional):
 	return additional[item]
 
 def boolean_feature(item, additional):
-	if item == additional:
-		return 1
+	if item in additional:
+		return additional[item]
 	else:
-		return 0
+		return -1
 
 
 def getAdditionalFeatureInfo(fields, feature_type, report_file):
@@ -212,28 +212,32 @@ def getAdditionalFeatureInfo(fields, feature_type, report_file):
 			report_out.write("\n")
 		
 		if type == 1:		# boolean
-			if len(fields[1]) == 2:		# 2 values
-				additional_info.append(fields[i][1].keys()[0])
+			if len(fields[i][1]) == 2:		# 2 values
+				additional_info.append({fields[i][1].keys()[0]:1, fields[i][1].keys()[1]:0})
 				func.append(boolean_feature)
 				index.append(i)
 
 				report_out.write("feature " + str(len(func) - 1) + ": ")
 				report_out.write("type = boolean (2 values) ")
 				report_out.write("field_name = " + fields[i][0])
-				report_out.write(" true = " + additional_info[-1])
+				report_out.write(" true = " + str(additional_info[-1]))
 				report_out.write("\n")
 
 			else:						# multiple values
-				for key in fields[i][1].viewkeys():
-					additional_info.append(key)
-					func.append(boolean_feature)
-					index.append(i)
+				report_out.write("feature " + str(len(func)) + ": ")
+				report_out.write("type = boolean (> 2 values) ")
+				add_info = {}
+				for j, key in enumerate(fields[i][1].viewkeys()):
+					add_info[key] = j
+					report_out.write(key + " = " + str(j) + "\n")
+					j += 1
+
+				additional_info.append(add_info)
+				func.append(boolean_feature)
+				index.append(i)
 					
-					report_out.write("feature " + str(len(func) - 1) + ": ")
-					report_out.write("type = boolean (> 2 values) ")
-					report_out.write("field_name = " + fields[i][0])
-					report_out.write(" true = " + key)
-					report_out.write("\n")
+				report_out.write("field_name = " + fields[i][0])
+				report_out.write("\n")
 
 		if type == 2:		# hash
 			print fields[i][0], "hash:"
