@@ -1,7 +1,7 @@
 conf = File.open("conf", "r")
 source = File.open("test.csv", "r")
 exciting = File.open("exciting", "w")
-output = File.open("output", "w")
+output = File.open("test1.csv", "w")
 
 f = Array.new
 while (not conf.eof)
