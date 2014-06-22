@@ -1,10 +1,10 @@
 function logistic_regression()
-	training_set = dlmread('training_partial');
+	training_set = dlmread('training_partial.csv');
 	A = spconvert(training_set);
     A = full(A);
     [tm, tn] = size(A);
     A = [ones(tm, 1), A];
-	y = dlmread('training_ans');
+	y = dlmread('training_ans.csv');
 	% now y is a row vector of 1 * m
 	y = y';
     [A, CV, T, y, y_cv, y_t] = divide(A, y);
@@ -12,7 +12,7 @@ function logistic_regression()
 	% n is the number of features
 	[m, n] = size(A);
 	
-    lambda = 0.01;
+    lambda = 2;
     function [f, g] = cost_function(x)
             % returns a vector of 1 * m
             hypo = sigmod(x, A);
@@ -24,17 +24,25 @@ function logistic_regression()
     AUC_result = 0;
     options = optimoptions('fminunc','GradObj','on');
     
-    while (lambda < 10)
+    file_cnt = 0;
+    while (lambda < 20)
         % x is the row vector of 1 * n used by fminunc
         x0 = zeros(1, n);
         % gradient descent
         % theta is a row vector of 1 * n
         
-        [theta, ~] = fminunc(@cost_function, x0, options);
+        [theta, ~, exitflag] = fminunc(@cost_function, x0, options);
+        if (exitflag == 0)
+            lambda = lambda * 2;
+            continue
+        end
         
-         prediction = sigmod(theta, CV);
+        prediction = sigmod(theta, CV);
+        %dlmwrite(sprintf('prediction_%d.csv', file_cnt), prediction, 'delimiter', '\n');
+        file_cnt = file_cnt + 1;
         %cross validation
         [~, ~, ~, AUC] = perfcurve(y_cv, prediction, 1);
+        display(sprintf('AUC = %d, lambda = %d', max(AUC, 1 - AUC), lambda));
         if max(AUC, 1 - AUC) > AUC_result
             AUC_result = max(AUC, 1 - AUC);
             lambda_result = lambda;
@@ -48,9 +56,11 @@ function logistic_regression()
 	[X, Y, ~, AUC] = perfcurve(y_t, prediction, 1);
 	AUC = max(AUC, 1 - AUC)
     lambda_result
+	dlmwrite('hypothesis.csv', theta_result(1, 2 : n), 'delimiter', '\n');
+    
     
 	%generate test prediction
-    test_set = dlmread('test');
+    test_set = dlmread('test1.csv');
 	B = spconvert(test_set);
     B = full(B);
     [tm, tn] = size(B);
@@ -68,7 +78,13 @@ end
 %divide the training set to 60, 20, 20
 %for cross validation
 function [B, CV, T, y_a, y_cv, y_t] = divide(A, y)
+    [tm, tn] = size(y);
     [m, n] = size(A);
+    if m < tm
+        A = [A; zeros(tm - m, n)];
+    end
+    [m, n] = size(A);
+    m = floor(m * 0.2);
     t1 = floor(m * 0.6);
     t2 = floor(m * 0.2);
     t3 = m - t1 - t2;

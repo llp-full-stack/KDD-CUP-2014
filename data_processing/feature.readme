@@ -1,0 +1,57 @@
+projects.csv
+feature 0-51: school_state
+feature 52-55: school_metro
+ = 0
+urban = 1
+suburban = 2
+rural = 3
+feature 56: school_charter
+feature 57: school_magnet
+feature 58: school_year_round
+feature 59: school_nlns
+feature 60: school_kipp
+feature 61: school_charter_ready_promise
+feature 62-66: teacher_prerfix
+Ms. = 0
+Mr. = 1
+Mr. & Mrs. = 2
+Mrs. = 3
+Dr. = 4
+feature 67: teacher_teach_for_america
+feature 68: teacher_ny_teaching_fellow
+feature 69-96: primary_focus_subject 
+feature 97-104: primary_focus_area
+feature 105-132: secondary_focus_subject
+feature 133-140: secondary_focus_area
+feature 141-147: resource_type
+Visitors = 1
+Other = 2
+Supplies = 3
+Books = 4
+Technology = 5
+Trips = 6
+feature 148: poverty_level
+From highest_level(3) to lowest(0)
+feature 149-153: grade_level
+feature 154: fulfillment_labor_materials 
+feature 155: total_price_excluding_optional_support
+feature 156: total_price_including_optional_support
+feature 157: students_reached
+feature 158: eligible_double_your_impact_match
+feature 159: eligible_almost_home_match
+
+donations.csv
+
+resources.csv
+feature 160-516: vendor
+feature 517: null
+feature 518: visitors
+feature 519: other
+feature 520: supplies
+feature 521: books
+feature 522: technology
+feature 523: trips
+feature 524: item_cost
+
+
+feature 525: essay_length
