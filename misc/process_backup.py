@@ -26,8 +26,7 @@ def read_one_config(file_name, feature_start):
 
 def read_config():
 	feature_start, p_cnt = read_one_config("projects_config", [0])
-	#feature_start, d_cnt  = read_one_config("donation_config", feature_start)
-	d_cnt = 0
+	feature_start, d_cnt  = read_one_config("donation_config", feature_start)
 	feature_start, r_cnt  = read_one_config("resources_config", feature_start)
 
 	return feature_start, p_cnt, d_cnt, r_cnt 
@@ -76,32 +75,32 @@ def create_sets(feature, p_cnt, d_cnt, r_cnt):
 
 	fin.close()
 
-#	fin = open("donation_data.csv", "r")
-#	reader = csv.reader(fin)
+	fin = open("donation_data.csv", "r")
+	reader = csv.reader(fin)
 	
-#	reader.next()
+	reader.next()
 
-#	now = p_cnt
-#	for row in reader:
-#		for i in xrange(d_cnt):
-#			value = eval(row[i + 1])
-#
-#			if feature[now + i] == feature[now + i + 1]:
-#				continue
-#			
-#			if feature[now + i] + 1 < feature[now + i + 1]:
-#				if row[0] in training:
-#					training[row[0]].append((feature[now+i] + value, 1))
-#				else:
-#					test[row[0]].append((feature[now+i] + value, 1))
-#			else:
-#				if value != 0:
-#					if row[0] in training:
-#						training[row[0]].append((feature[now+i], value))
-#					else:
-#						test[row[0]].append((feature[now+i], value))
-#
-#	fin.close()
+	now = p_cnt
+	for row in reader:
+		for i in xrange(d_cnt):
+			value = eval(row[i + 1])
+
+			if feature[now + i] == feature[now + i + 1]:
+				continue
+			
+			if feature[now + i] + 1 < feature[now + i + 1]:
+				if row[0] in training:
+					training[row[0]].append((feature[now+i] + value, 1))
+				else:
+					test[row[0]].append((feature[now+i] + value, 1))
+			else:
+				if value != 0:
+					if row[0] in training:
+						training[row[0]].append((feature[now+i], value))
+					else:
+						test[row[0]].append((feature[now+i], value))
+
+	fin.close()
 
 	fin = open("resources.csv", "r")
 	reader = csv.reader(fin)
@@ -186,8 +185,6 @@ def main():
 	print feature[p_cnt+d_cnt:]
 
 	feature.append(feature[-1] + 1);	# essay length
-
-	print feature
 
 	print p_cnt, d_cnt, r_cnt
 

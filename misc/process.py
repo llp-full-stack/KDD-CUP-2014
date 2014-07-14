@@ -10,7 +10,7 @@ def read_one_config(file_name, feature_start):
 	for row_str in fin.readlines():
 		row = row_str[:-1].split(" ")
 		feature_start.append(feature_cnt)
-		
+
 		if row[0] == "boolean" and eval(row[1]) > 2:
 			feature_cnt += eval(row[1])
 		elif row[0] == "none":
@@ -26,8 +26,7 @@ def read_one_config(file_name, feature_start):
 
 def read_config():
 	feature_start, p_cnt = read_one_config("projects_config", [0])
-	#feature_start, d_cnt  = read_one_config("donation_config", feature_start)
-	d_cnt = 0
+	feature_start, d_cnt  = read_one_config("donation_config", feature_start)
 	feature_start, r_cnt  = read_one_config("resources_config", feature_start)
 
 	return feature_start, p_cnt, d_cnt, r_cnt 
@@ -76,32 +75,32 @@ def create_sets(feature, p_cnt, d_cnt, r_cnt):
 
 	fin.close()
 
-#	fin = open("donation_data.csv", "r")
-#	reader = csv.reader(fin)
+	fin = open("donation_data.csv", "r")
+	reader = csv.reader(fin)
 	
-#	reader.next()
+	reader.next()
 
-#	now = p_cnt
-#	for row in reader:
-#		for i in xrange(d_cnt):
-#			value = eval(row[i + 1])
-#
-#			if feature[now + i] == feature[now + i + 1]:
-#				continue
-#			
-#			if feature[now + i] + 1 < feature[now + i + 1]:
-#				if row[0] in training:
-#					training[row[0]].append((feature[now+i] + value, 1))
-#				else:
-#					test[row[0]].append((feature[now+i] + value, 1))
-#			else:
-#				if value != 0:
-#					if row[0] in training:
-#						training[row[0]].append((feature[now+i], value))
-#					else:
-#						test[row[0]].append((feature[now+i], value))
-#
-#	fin.close()
+	now = p_cnt
+	for row in reader:
+		for i in xrange(d_cnt):
+			value = eval(row[i + 1])
+
+			if feature[now + i] == feature[now + i + 1]:
+				continue
+			
+			if feature[now + i] + 1 < feature[now + i + 1]:
+				if row[0] in training:
+					training[row[0]].append((feature[now+i] + value, 1))
+				else:
+					test[row[0]].append((feature[now+i] + value, 1))
+			else:
+				if value != 0:
+					if row[0] in training:
+						training[row[0]].append((feature[now+i], value))
+					else:
+						test[row[0]].append((feature[now+i], value))
+
+	fin.close()
 
 	fin = open("resources.csv", "r")
 	reader = csv.reader(fin)
@@ -128,19 +127,6 @@ def create_sets(feature, p_cnt, d_cnt, r_cnt):
 
 	fin.close()
 
-	fin = open("essay_length.csv", "r")
-	reader = csv.reader(fin)
-
-	now = p_cnt + d_cnt + r_cnt
-	for row in reader:
-		value = eval(row[1])
-		if row[0] in training:
-			training[row[0]].append((feature[now], value))
-		else:
-			test[row[0]].append((feature[now], value))
-
-	fin.close()
-
 	fin = open("outcomes.csv", "r")
 	reader = csv.reader(fin)
 
@@ -150,31 +136,40 @@ def create_sets(feature, p_cnt, d_cnt, r_cnt):
 	fin.close()
 	return training, test
 
-def print_set(filename, report_name, set, hasOutcome):
+def print_set(filename, report_name, ans_name, set, hasOutcome):
 
 	fout = open(filename, "w")
 	report_out = open(report_name, "w")
+	ans_out = open(ans_name, "w")
 	writer = csv.writer(fout, delimiter = ' ')
-
+	ans_writer = csv.writer(ans_out, delimiter = ' ')
+	
+	row_cnt = 0;
 	for item in set.viewitems():
-		report_out.write(item[0] + "\n")
+		report_out.write(item[0])
 
-		row = []
+		#row = []
 		non_zero_cnt = 0
 		if hasOutcome:
-			row.append(str(item[1][-1]))
-			row.extend([str(len(item[1]) -1), "0", "0"])
+		#	row.append(str(item[1][-1]))
+		#	row.extend([str(len(item[1]) -1), "0", "0"])
 			non_zero_cnt = len(item[1]) - 1
 		else:
-			row.extend(["0", str(len(item[1])), "0", "0"])
+		#	row.extend([str(len(item[1])), "0", "0"])
 			non_zero_cnt = len(item[1])
 
+		row_cnt = row_cnt + 1
 		for i in xrange(non_zero_cnt):
-			row.append("%d:%d" % item[1][i] )
+			row = [str(row_cnt), str(item[1][i][0] + 1), str(item[1][i][1])]
+			#row.append("%d %d" % item[1][i])
+			writer.writerow(row)
 
-		writer.writerow(row)
+		if hasOutcome:
+			row = [str(item[1][-1])]
+			ans_writer.writerow(row)
 
 	fout.close()
+	ans_out.close()
 
 def main():
 	feature, p_cnt, d_cnt, r_cnt = read_config()		# reads configs and calculate feature count
@@ -185,49 +180,12 @@ def main():
 
 	print feature[p_cnt+d_cnt:]
 
-	feature.append(feature[-1] + 1);	# essay length
-
-	print feature
-
 	print p_cnt, d_cnt, r_cnt
-
-	fout = open("feature.readme", "w")
-
-	fout.write("projects.csv\n")
-	
-	for i in xrange(p_cnt):
-		if feature[i] + 1 == feature[i+1]:
-			fout.write("feature %d: \n" % feature[i])
-
-		else:
-			fout.write("feature %d-%d: \n" % (feature[i], feature[i+1] - 1))
-	
-	fout.write("\ndonations.csv\n")
-
-	for i in xrange(p_cnt, p_cnt + d_cnt):
-		if feature[i] + 1 == feature[i+1]:
-			fout.write("feature %d: \n" % feature[i])
-
-		else:
-			fout.write("feature %d-%d: \n" % (feature[i], feature[i+1] - 1))
-
-
-	fout.write("\nresources.csv\n")
-
-	for i in xrange(p_cnt + d_cnt, p_cnt + d_cnt + r_cnt):
-		if feature[i] + 1 == feature[i+1]:
-			fout.write("feature %d: \n" % feature[i])
-
-		else:
-			fout.write("feature %d-%d: \n" % (feature[i], feature[i+1] - 1))
-
-	fout.close()
-
 
 	training, test = create_sets(feature, p_cnt, d_cnt, r_cnt)		# creates the two sets
 
-	print_set("training.csv", "training_report.txt", training, True)
-	print_set("test.csv", "test_report.txt", test, False)
+	print_set("training.csv", "training_report.txt", "training_ans.csv", training, True)
+	print_set("test.csv", "test_report.txt", "test_ans.csv", test, False)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,8 @@
 *~
 *.csv
 data/*
+run/v2/test_report.txt
+run/v3/test_report.txt
+run/v3/test/
+run/v3/training_positive/
+run/v3/training_negative/
